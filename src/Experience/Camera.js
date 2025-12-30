@@ -9,12 +9,24 @@ export default class Camera {
         this.scene = this.experience.scene
         this.canvas = this.experience.canvas
 
-        // Add testing mode flag
-        this.testingMode = false // Set to true for orbit controls, false for chase camera
+        // Camera modes
+        this.testingMode = false // Set to true for orbit controls
+        
+        // Third-person camera settings (can be updated via GameSettings)
+        this.cameraSettings = {
+            distance: 12,
+            height: 6,
+            smoothness: 0.08,
+            fov: 50,
+            lookAheadDistance: 5
+        }
+        
+        // Camera state
+        this.targetPosition = new THREE.Vector3()
+        this.currentLookAt = new THREE.Vector3()
 
         this.setInstance()
 
-        // Enable orbit controls during testing
         if (this.testingMode) {
             this.setOrbitControls()
         }
@@ -22,14 +34,14 @@ export default class Camera {
 
     setInstance() {
         this.instance = new THREE.PerspectiveCamera(
-            35,
+            this.cameraSettings.fov,
             this.sizes.width / this.sizes.height,
             0.1,
             1000
         )
 
-        this.instance.position.set(5, 10, 15) // Better initial position for viewing the car
-        this.instance.lookAt(new THREE.Vector3(5, 0, 0)) // Look at approximate car position
+        this.instance.position.set(5, 15, 25)
+        this.instance.lookAt(new THREE.Vector3(5, 0, 0))
         this.scene.add(this.instance)
     }
 
@@ -40,7 +52,44 @@ export default class Camera {
         )
 
         this.controls.enableDamping = true
-        this.controls.target.set(5, 5, 0) // Target the car's initial position
+        this.controls.target.set(5, 5, 0)
+    }
+    
+    // Update camera settings from GameSettings
+    updateSettings(settings) {
+        if (settings.distance !== undefined) this.cameraSettings.distance = settings.distance
+        if (settings.height !== undefined) this.cameraSettings.height = settings.height
+        if (settings.smoothness !== undefined) this.cameraSettings.smoothness = settings.smoothness
+        if (settings.fov !== undefined) {
+            this.cameraSettings.fov = settings.fov
+            this.instance.fov = settings.fov
+            this.instance.updateProjectionMatrix()
+        }
+    }
+    
+    // Third-person follow camera update
+    followTarget(target, forward) {
+        if (this.testingMode || !target) return
+        
+        const { distance, height, smoothness, lookAheadDistance } = this.cameraSettings
+        
+        // Calculate ideal camera position behind the target
+        const offset = forward.clone().multiplyScalar(-distance)
+        offset.y = height
+        
+        this.targetPosition.copy(target).add(offset)
+        
+        // Smooth camera movement
+        this.instance.position.lerp(this.targetPosition, smoothness)
+        
+        // Look ahead of the car
+        const lookAtPoint = target.clone()
+        lookAtPoint.add(forward.clone().multiplyScalar(lookAheadDistance))
+        lookAtPoint.y = target.y + 1
+        
+        // Smooth look-at
+        this.currentLookAt.lerp(lookAtPoint, smoothness * 1.5)
+        this.instance.lookAt(this.currentLookAt)
     }
 
     resize() {
@@ -49,7 +98,6 @@ export default class Camera {
     }
 
     update() {
-        // Only update controls if they exist
         if (this.testingMode && this.controls) {
             this.controls.update()
         }

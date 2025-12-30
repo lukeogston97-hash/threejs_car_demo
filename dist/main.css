@@ -177,37 +177,6 @@ body {
     transform: scale(1.1);
 }
 
-/* Updated Nintendo-style reset button */
-#reset-button {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 15px 30px;
-    font-size: 22px;
-    font-weight: bold;
-    font-family: 'Press Start 2P', 'Bowlby One SC', sans-serif;
-    background-color: #FF3D00; /* Orange-red instead of pink */
-    color: white;
-    border: none;
-    border-radius: 40px; /* More rounded, Nintendo-style */
-    cursor: pointer;
-    z-index: 1000;
-    box-shadow: 0 8px 0 #C53000, 0 10px 20px rgba(0,0,0,0.3); /* Deeper 3D effect */
-    transition: transform 0.1s, box-shadow 0.1s;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    text-shadow: 2px 2px 0 #C53000;
-}
-
-#reset-button:hover {
-    background-color: #FF6333;
-    transform: translateY(-3px);
-    box-shadow: 0 11px 0 #C53000, 0 13px 22px rgba(0,0,0,0.3);
-}
-
-#reset-button:active {
-    transform: translateY(5px);
-    box-shadow: 0 3px 0 #C53000, 0 5px 10px rgba(0,0,0,0.3);
-}
+/* Reset button removed - using keyboard R to reload */
 
 /*# sourceMappingURL=main.css.map*/

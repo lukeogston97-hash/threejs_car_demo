@@ -1,5 +1,5 @@
 import * as CANNON from 'cannon-es'
-import CannonDebugger from 'cannon-es-debugger'
+// import CannonDebugger from 'cannon-es-debugger'
 import Experience  from './Experience.js'
 
 export default class PhysicsWorld {
@@ -15,35 +15,27 @@ export default class PhysicsWorld {
         this.instance.broadphase = new CANNON.SAPBroadphase(this.instance)
         this.instance.solver.iterations = 10
 
-        // Default material
+        // Default material - smooth, no bounce
         const defaultMaterial = new CANNON.Material('default')
         const defaultContactMaterial = new CANNON.ContactMaterial(defaultMaterial, defaultMaterial, {
-            friction: 0.4,
+            friction: 0.3,
             restitution: 0.0
         })
         this.instance.addContactMaterial(defaultContactMaterial)
         this.instance.defaultContactMaterial = defaultContactMaterial
 
-        // DEBUGGER ENABLED - Comment out the block below to disable physics visualization
-        this.cannonDebugger = new CannonDebugger(this.scene, this.instance, {
-            // Optional debugger settings
-            color: 0x00ff00, // Default color
-            scale: 1,        // Scale of the debug shapes
-        })
-        
-        /* 
-        TO DISABLE DEBUGGER: 
-        Set this.cannonDebugger = null
-        
-        TO ENABLE DEBUGGER:
-        Uncomment the block above
-        */
+        // Debugger disabled for cleaner visuals
+        // Uncomment below to enable physics debug visualization
+        // this.cannonDebugger = new CannonDebugger(this.scene, this.instance, {
+        //     color: 0x00ff00,
+        //     scale: 1,
+        // })
+        this.cannonDebugger = null
     }
 
     update() {
         this.instance.fixedStep()
         
-        // DEBUGGER UPDATE - Comment out this line to disable physics visualization
         if (this.cannonDebugger) {
             this.cannonDebugger.update()
         }

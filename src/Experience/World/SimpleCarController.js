@@ -7,8 +7,9 @@ export default class SimpleCarController {
     constructor() {
         this.experience = new Experience()
         this.simpleCar = new SimpleCar() // Get the singleton instance of SimpleCar
-        this.maxSteerVal = Math.PI / 8
-        this.maxForce = -25
+        this.maxSteerVal = Math.PI / 6.5  // Tighter steering for better control
+        // Positive drive force should map to "forward" with ArrowUp/W
+        this.maxForce = 65
 
         // Get Nintendo colors from the car model
         this.nintendoColors = this.simpleCar.simpleCarModel.getNintendoColors();
@@ -18,24 +19,14 @@ export default class SimpleCarController {
         this.maxJumps = 2
         this.isGrounded = true
         this.groundCheckInterval = null
+        
+        // Control feel
+        this.steerSensitivity = 0.06 // More responsive steering
+        this.jumpImpulse = 45 // Less bouncy
+        this.boostForce = 100 // Smoother boost
 
-        this.createResetButton()
         this.setSteering()
         this.setupGroundDetection()
-    }
-
-    createResetButton() {
-        // Create reset button
-        const resetButton = document.createElement('button')
-        resetButton.id = 'reset-button'
-        resetButton.textContent = 'RESET'
-
-        // Reset functionality - Properly reload the scene
-        resetButton.addEventListener('click', () => {
-            window.location.reload()
-        })
-
-        document.body.appendChild(resetButton)
     }
 
     setupGroundDetection() {
@@ -45,8 +36,8 @@ export default class SimpleCarController {
             const position = this.simpleCar.vehicle.chassisBody.position;
 
             // Ray starting from slightly above the car's position
-            const start = new CANNON.Vec3(position.x, position.y - 0.4, position.z);
-            const end = new CANNON.Vec3(position.x, position.y - 1.5, position.z);
+            const start = new CANNON.Vec3(position.x, position.y - 0.3, position.z);
+            const end = new CANNON.Vec3(position.x, position.y - 1.0, position.z);
 
             // Perform the raycast
             const result = new CANNON.RaycastResult();
@@ -55,10 +46,8 @@ export default class SimpleCarController {
             // If the ray hit something, the car is grounded
             if (result.hasHit) {
                 if (!this.isGrounded) {
-                    // We've just landed
                     this.isGrounded = true;
-                    this.jumpCount = 0; // Reset jump count when landing
-                    console.log("Car landed - jumps reset!");
+                    this.jumpCount = 0;
                 }
             } else {
                 this.isGrounded = false;
@@ -68,16 +57,13 @@ export default class SimpleCarController {
 
     jumpCar() {
         if (this.jumpCount < this.maxJumps) {
-            // Apply an upward impulse at the center of mass
+            // Apply upward impulse - less bouncy
             this.simpleCar.vehicle.chassisBody.applyImpulse(
-                new CANNON.Vec3(0, 60, 0),
+                new CANNON.Vec3(0, 45, 0),
                 new CANNON.Vec3(0, 0, 0)
             )
             this.jumpCount++
             this.isGrounded = false;
-            console.log(`Jump! (${this.jumpCount}/${this.maxJumps})`)
-        } else {
-            console.log('No more jumps available until landing!')
         }
     }
 
@@ -157,7 +143,7 @@ export default class SimpleCarController {
     }
 
     turboBoost() {
-        // Apply a strong forward impulse
+        // Apply forward boost impulse
         const direction = new CANNON.Vec3()
 
         // Get the forward direction of the car
@@ -166,8 +152,8 @@ export default class SimpleCarController {
             direction
         )
 
-        // Scale it up for a boost
-        direction.scale(200, direction)
+        // Slightly stronger boost (tad faster overall)
+        direction.scale(115, direction)
 
         // Apply the impulse
         this.simpleCar.vehicle.chassisBody.applyImpulse(
@@ -177,8 +163,6 @@ export default class SimpleCarController {
 
         // Add a boost effect
         this.createBoostEffect(this.simpleCar.chassisMesh.position);
-
-        console.log('Turbo Boost activated!')
     }
 
     createBoostEffect(position) {
@@ -237,14 +221,15 @@ export default class SimpleCarController {
             switch (event.key) {
                 case "w":
                 case "ArrowUp":
+                    // Drive both rear wheels in the same direction
                     this.simpleCar.vehicle.setWheelForce(this.maxForce, 0)
-                    this.simpleCar.vehicle.setWheelForce(-this.maxForce, 1)
+                    this.simpleCar.vehicle.setWheelForce(this.maxForce, 1)
                     break
 
                 case 's':
                 case 'ArrowDown':
-                    this.simpleCar.vehicle.setWheelForce(-this.maxForce * 0.5, 0)
-                    this.simpleCar.vehicle.setWheelForce(this.maxForce * 0.5, 1)
+                    this.simpleCar.vehicle.setWheelForce(-this.maxForce * 0.6, 0)
+                    this.simpleCar.vehicle.setWheelForce(-this.maxForce * 0.6, 1)
                     break
 
                 case 'a':

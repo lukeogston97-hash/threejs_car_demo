@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import * as CANNON from 'cannon-es'
 import Experience from '../Experience.js'
 import SimpleCarModel from './SimpleCarModel.js'
 import SimpleCarPhysics from './SimpleCarPhysics.js'
@@ -29,43 +30,82 @@ export default class SimpleCar {
         this.rearWheelMesh1 = this.simpleCarModel.rearWheelMesh1
         this.rearWheelMesh2 = this.simpleCarModel.rearWheelMesh2
         this.chassisMesh = this.simpleCarModel.chassisMesh
-
-        this.initChaseCamera()
+        
+        // For camera tracking
+        this.forwardDirection = new THREE.Vector3(0, 0, 1)
+        this.tempQuat = new THREE.Quaternion()
     }
-
-    initChaseCamera() {
-        this.chaseCamera = new THREE.Object3D()
-        this.chaseCameraPivot = new THREE.Object3D()
-        this.view = new THREE.Vector3()
-
-        this.chaseCamera.position.set(0, 5, -8) // Adjusted position for better view
-        this.chaseCameraPivot.position.set(0, 0, 0)
-        this.chaseCamera.add(this.chaseCameraPivot)
-        this.scene.add(this.chaseCamera)
-
-        if (this.chassisMesh) {
-            this.chassisMesh.add(this.chaseCamera)
+    
+    // Get the car's forward direction for camera
+    getForwardDirection() {
+        if (!this.chassisMesh) return this.forwardDirection
+        
+        // Get forward direction from chassis rotation
+        this.tempQuat.copy(this.chassisMesh.quaternion)
+        this.forwardDirection.set(0, 0, 1)
+        this.forwardDirection.applyQuaternion(this.tempQuat)
+        this.forwardDirection.y = 0
+        this.forwardDirection.normalize()
+        
+        return this.forwardDirection
+    }
+    
+    // Get car position
+    getPosition() {
+        if (!this.chassisMesh) return new THREE.Vector3(5, 0, 0)
+        return this.chassisMesh.position.clone()
+    }
+    
+    // Update car color from settings
+    updateColor(colorHex) {
+        if (this.chassisMesh && this.chassisMesh.children) {
+            this.chassisMesh.children.forEach(child => {
+                if (child.material && child.material.color) {
+                    // Only update the main body, not windows or other parts
+                    const currentHex = child.material.color.getHex()
+                    // Check if it's a bright color (not black/gray for windows)
+                    if (currentHex > 0x333333) {
+                        child.material.color.set(colorHex)
+                        if (child.material.emissive) {
+                            child.material.emissive.set(colorHex)
+                            child.material.emissiveIntensity = 0.1
+                        }
+                    }
+                }
+            })
         }
     }
-
-    // Only modify the updateChaseCamera method
-
-    updateChaseCamera() {
-        // Skip chase camera updates if in testing mode
-        if (this.experience.camera.testingMode) {
-            return
+    
+    // Reset car position
+    resetPosition() {
+        const chassis = this.vehicle.chassisBody
+        if (chassis) {
+            // Stop all motion first
+            chassis.velocity.setZero()
+            chassis.angularVelocity.setZero()
+            
+            // Reset position - on the starting line
+            chassis.position.set(55, 2, 5)
+            
+            // Reset rotation to face forward (along the track)
+            chassis.quaternion.setFromAxisAngle(
+                new CANNON.Vec3(0, 1, 0),
+                -Math.PI / 2
+            )
+            
+            // Wake up the body
+            chassis.wakeUp()
         }
-
-        this.chaseCameraPivot.getWorldPosition(this.view)
-
-        if (this.view.y < 1) {
-            this.view.y = 1
+        
+        // Reset wheels
+        if (this.vehicle.wheelBodies) {
+            this.vehicle.wheelBodies.forEach(wheel => {
+                wheel.velocity.setZero()
+                wheel.angularVelocity.setZero()
+                wheel.wakeUp()
+            })
         }
-
-        this.experience.camera.instance.position.lerp(this.view, 0.3)
-        this.experience.camera.instance.lookAt(this.chassisMesh.position)
     }
-
 
     update() {
         if (this.chassisMesh) {
@@ -87,10 +127,13 @@ export default class SimpleCar {
         if (this.rearWheelMesh2) {
             this.simpleCarModel.updateMeshPosition(this.rearWheelMesh2, this.vehicle.wheelBodies[1])
         }
-
-        this.updateChaseCamera()
-
-        // Update the physics
-        //this.simpleCarPhysics.update()
+        
+        // Update camera to follow car
+        if (!this.experience.camera.testingMode && this.chassisMesh) {
+            this.experience.camera.followTarget(
+                this.chassisMesh.position,
+                this.getForwardDirection()
+            )
+        }
     }
 }
