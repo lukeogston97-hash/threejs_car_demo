@@ -31,15 +31,6 @@ export default class Experience {
         this.camera = new Camera()
         this.renderer = new Renderer()
 
-        // Handle loading screen manually
-        const loadingScreen = document.getElementById('loading-screen')
-        setTimeout(() => {
-            loadingScreen.classList.add('fade-out')
-            loadingScreen.addEventListener('transitionend', (event) => {
-                event.target.remove()
-            })
-        }, 500)
-
         this.world = new World()
 
         // Access simpleCar directly from world
