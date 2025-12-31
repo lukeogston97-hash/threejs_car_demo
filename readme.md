@@ -40,7 +40,7 @@ Drive around the circular track, collect coins, hit the boost pads, and set a hi
 4. Collect all coins before time runs out for bonus points
 5. Your best score is saved locally
 
-## 🛠️ Setup
+## Setup
 
 Download [Node.js](https://nodejs.org/en/download/).
 Run the following commands:
@@ -56,7 +56,7 @@ npm run dev
 npm run build
 ```
 
-## 🎨 Tech Stack
+## Tech Stack
 
 - **Three.js** - 3D graphics and rendering
 - **Cannon-es** - Physics simulation
