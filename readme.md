@@ -1,10 +1,10 @@
-# Three.js Kart Racing Demo 🏎️
+# Three.js Kart Racing Demo
 
 A fun Mario Kart-inspired racing game demo built with Three.js and Cannon-es!
 
 Drive around the circular track, collect coins, hit the boost pads, and set a high score!
 
-## 🎮 Controls
+## Controls
 
 | Action | Keys |
 |--------|------|
@@ -18,7 +18,7 @@ Drive around the circular track, collect coins, hit the boost pads, and set a hi
 | Reset Position | R |
 | Pause Game | P or Escape |
 
-## ✨ Features
+## Features
 
 - **Circular Race Track** - A proper ring-shaped track with curbs and road markings
 - **Mario Kart-Style Kart** - Custom 3D kart with spoiler, headlights, and proper wheel positioning
@@ -32,7 +32,7 @@ Drive around the circular track, collect coins, hit the boost pads, and set a hi
 - **Game Settings (lil-gui)** - Adjust difficulty, time limits, and more
 - **Sound Effects** - Generated programmatically using Web Audio API (no external sound files)
 
-## 🎯 Gameplay
+## Gameplay
 
 1. Press **Enter** or click **Start Game** to begin
 2. Drive around the circular track collecting coins
@@ -64,7 +64,7 @@ npm run build
 - **Webpack** - Module bundling
 - **Web Audio API** - Sound effects (oscillator-based)
 
-## 📚 Credits
+## Credits
 
 The project was built using templates from [Bruno Simon's](https://github.com/brunosimon)
 [Three.js Journey](https://threejs-journey.com/) class.
@@ -72,4 +72,8 @@ The project was built using templates from [Bruno Simon's](https://github.com/br
 The project uses [Cannon-es](https://pmndrs.github.io/cannon-es/docs/index.html)
 and [Three.js](https://threejs.org/) libraries.
 
-For questions or suggestions: [chrysovalantis.constantinou@gmail.com](mailto:chrysovalantis.constantinou@gmail.com)
+## Support the Project
+
+If you enjoy Void Rush and would like to support development of future games:
+
+https://www.paypal.com/paypalme/doctorNoo
