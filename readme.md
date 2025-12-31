@@ -74,6 +74,6 @@ and [Three.js](https://threejs.org/) libraries.
 
 ## Support the Project
 
-If you enjoy Void Rush and would like to support development of future games:
+If you enjoy Coin Racer and would like to support development of future games:
 
 https://www.paypal.com/paypalme/doctorNoo
